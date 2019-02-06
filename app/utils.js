@@ -27,3 +27,11 @@ global.screenWidth = screenWidth;
 global.screenHeight = screenHeight;
 
 export { screenWidth, screenHeight };
+
+const ASPECT_RATIO = screenWidth / screenHeight;
+const LATITUDE_DELTA = 0.0922;
+const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+export const DELTA = {
+  latitudeDelta: LATITUDE_DELTA,
+  longitudeDelta: LONGITUDE_DELTA
+};

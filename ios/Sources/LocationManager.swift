@@ -9,40 +9,85 @@
 import Foundation
 import CoreLocation
 
+let COORDINATE_LAT_DELTA = 0.00001;
+let COORDINATE_LNG_DELTA = 0.00001;
+let COORDINATE_CHANGE_DELTA = pow(COORDINATE_LNG_DELTA, 2)
 
-@objc(Location)
-class LocationManager: RCTEventEmitter, CLLocationManagerDelegate {
+
+func getDeltaBetweenCoordinates(_ v1: CLLocationCoordinate2D, _ v2: CLLocationCoordinate2D?) -> Dictionary<String, Double> {
+
+
+    if (v2 == nil) {
+        return [
+            "latitude": 0.0,
+            "longitude": 0.0
+        ]
+    }
+
+    let latDelta = pow(v1.latitude - v2!.latitude, 2);
+    let lngDelta = pow(v1.longitude - v2!.longitude, 2);
+    return [
+        "latitude": latDelta,
+        "longitude": lngDelta
+    ]
+}
+
+func CheckIfCanDispatchEvent(_ v1: CLLocationCoordinate2D, _ v2: CLLocationCoordinate2D?) -> Bool {
+    if (v2 == nil) {
+        return true;
+    }
+    let deltas = getDeltaBetweenCoordinates(v1, v2!);
+    let longitude = Double(deltas["longitude"]!)
+    let latitude = Double(deltas["latitude"]!)
+    return latitude > COORDINATE_CHANGE_DELTA && longitude > COORDINATE_CHANGE_DELTA;
+}
+
+
+class LocationManager: NSObject, CLLocationManagerDelegate {
 
 
     public var manager: CLLocationManager;
     var lastCoordinate: CLLocationCoordinate2D?;
     var totalDistance: Double = 0.0;
-
-    override static func requiresMainQueueSetup() -> Bool {
-        return true
-    }
-
-    func dispatch(name: String, payload: Any) -> Void {
-        self.sendEvent(withName: name, body: payload)
-    }
-
-    override func supportedEvents() -> [String]! {
-        return ["authorizationStatusDidChange", "headingUpdated", "locationUpdated", "onWarning"]
-    }
+    var isActive = false;
+    var initialDispatch = true;
+    public var dispatch = noopDispatcher
 
     override init() {
-        self.manager = CLLocationManager()
+
+        self.manager = CLLocationManager();
         super.init();
         self.manager.delegate = self
+        self.manager.pausesLocationUpdatesAutomatically = true;
+        self.manager.desiredAccuracy = kCLLocationAccuracyBest
+        self.manager.distanceFilter = 1;
+        self.manager.activityType = CLActivityType.fitness
+        self.manager.allowsBackgroundLocationUpdates = true;
+        self.manager.requestWhenInUseAuthorization()
+        self.manager.requestAlwaysAuthorization();
     }
 
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        self.dispatch(name: "onWarning", payload: ["onWarning"])
+        self.dispatch("onWarning", ["onWarning"])
     }
 
+    func parseLocation(location: CLLocation) {
+        //  let decoder = CLGeocoder.init();
+    }
+
+
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+
+
+        guard locations.count > 0 else {
+            return;
+        }
+
+
         let location = locations.last!;
+
+
         let decoder = CLGeocoder.init();
         decoder.reverseGeocodeLocation(location, completionHandler: {
             (placemarks, error) in
@@ -50,32 +95,59 @@ class LocationManager: RCTEventEmitter, CLLocationManagerDelegate {
                 return;
             }
             let location = placemarks?.first?.location;
-            let coordinate = location!.coordinate;
-            //位置的坐标在不停的改变
+            let currCoordinate = location!.coordinate;
+            let shouldDispatch = CheckIfCanDispatchEvent(currCoordinate, self.lastCoordinate)
+            let comparation = getDeltaBetweenCoordinates(currCoordinate, self.lastCoordinate)
 
-          var distance = 0.0;
-          var shouldDispatch = false;
-            if (self.lastCoordinate == nil) {
-              shouldDispatch = true
-            }else{
-              shouldDispatch = compareCoordinate(current: coordinate, last: self.lastCoordinate!);
-              distance = getDistance(coordinate, self.lastCoordinate!)
-          }
-            self.totalDistance = distance + self.totalDistance;
-          
-            self.lastCoordinate = coordinate;
+//          print(location)
+            //event name
+            let comparationEventName = "comparation";
+            let locationUpdatedEventName = "locationUpdated";
+
+
+            //payload
+            let coordinate = [
+                "latitude": currCoordinate.latitude,
+                "longitude": currCoordinate.longitude,
+            ]
+
+            let comp = [
+                "lat": comparation["latitude"],
+                "lng": comparation["longitude"]
+            ]
+
+            let speed = location!.speed;
+
+
+            self.dispatch(
+                    comparationEventName,
+                    [
+                        "shouldDispatch": shouldDispatch,
+                        "coordinate": coordinate,
+                        "comparation": comp,
+                        "speed": speed
+                    ])
             if (shouldDispatch == true) {
-                self.dispatch(name: "locationUpdated", payload: [
-                    "coordinate": [
-                        "latitude": coordinate.latitude,
-                        "longitude": coordinate.longitude,
-                    ],
-                    "distance": self.totalDistance
-                ])
+
+                let distance = getDistance(currCoordinate, self.lastCoordinate)
+
+                if (location!.speed < 0.0) {
+//                    distance = 0.0;
+                }
+                self.totalDistance = distance + self.totalDistance;
+                self.dispatch(
+                        locationUpdatedEventName,
+                        [
+                            "coordinate": coordinate,
+                            "distance": distance,
+                        ])
+
+
             }
 
+            self.lastCoordinate = currCoordinate;
+//            self.lastLocation = location;
         })
-
 
     }
 
@@ -84,18 +156,20 @@ class LocationManager: RCTEventEmitter, CLLocationManagerDelegate {
 
     }
 
+    func stop() {
+        self.isActive = false;
+        self.manager.stopUpdatingLocation();
+        self.manager.stopUpdatingHeading()
+    }
 
-    @objc func start() {
-        self.manager.pausesLocationUpdatesAutomatically = true;
-        self.manager.desiredAccuracy = kCLLocationAccuracyBest
-        self.manager.distanceFilter = 1;
-        self.manager.activityType = CLActivityType.fitness
-        self.manager.allowsBackgroundLocationUpdates = true;
-        self.manager.requestWhenInUseAuthorization()
-        self.manager.requestAlwaysAuthorization();
+    func start() {
+
+        if (self.isActive) {
+            self.stop();
+        }
+        self.isActive = true;
         self.manager.startUpdatingLocation();
         self.manager.startUpdatingHeading();
-
     }
 
 

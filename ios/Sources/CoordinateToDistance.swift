@@ -8,7 +8,7 @@ import Foundation
 import CoreLocation
 
 let EARTH_RADIUS = 6378.137;
-
+//let EARTH_RADIUS = 6371
 let KM_DELTA = 1.609344;
 
 func getRadius(_ input: Double) -> Double {
@@ -36,13 +36,16 @@ func getRadius(_ input: Double) -> Double {
 
 //https://blog.csdn.net/yi412/article/details/70182769
 
-func getDistance(_ first: CLLocationCoordinate2D, _ second: CLLocationCoordinate2D) -> Double {
+func getDistance(_ first: CLLocationCoordinate2D, _ second: CLLocationCoordinate2D?) -> Double {
 
+    if (second == nil) {
+        return 0.0;
+    }
 
     let radLat1 = getRadius(first.latitude);
-    let radLat2 = getRadius(second.latitude);
+    let radLat2 = getRadius(second!.latitude);
     let radLng1 = getRadius(first.latitude);
-    let radLng2 = getRadius(second.latitude);
+    let radLng2 = getRadius(second!.latitude);
 
 
     let deltaLat = radLat1 - radLat1;
@@ -59,19 +62,11 @@ func getDistance(_ first: CLLocationCoordinate2D, _ second: CLLocationCoordinate
     let cosSqrt = cos2 * cos1
 
     let powOfLng = pow(sinLng, 2);
-
-
     let v1 = (powOfLng * cosSqrt) + sinLat;
-
-    let powOfV1 = pow(v1, 1);
-
-
+    let powOfV1 = pow(v1, 2);
     let square = sqrt(powOfV1)
-    let t = asin(square) * 2 * EARTH_RADIUS;
-
-    let miles = t * 1000
-    let d = round(miles) / 1000 * KM_DELTA;
-    return d
+    let miles = asin(square) * 2 * EARTH_RADIUS * 1000;
+    return round(miles) / 1000 * KM_DELTA
 
 
 }
