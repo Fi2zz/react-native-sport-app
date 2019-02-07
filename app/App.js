@@ -20,7 +20,6 @@ export default class App extends Component {
     polylines: [],
     distance: 0.0,
     time: "00:00:00",
-    pause: true,
     speed: 0.0,
     debug: {
       shouldDispatch: true,
@@ -29,6 +28,11 @@ export default class App extends Component {
         lng: null
       },
       coordinate: {}
+    },
+    task: {
+      stopped: true,
+      pause: true,
+      reset: false
     }
   };
 
@@ -57,8 +61,10 @@ export default class App extends Component {
       );
       Sport.addListener("locationUpdated", data => {
         const { coordinate, distance } = data;
-        const { polylines, region } = this.state;
+        let { polylines, region } = this.state;
+
         polylines.push(coordinate);
+
         this.setState({
           polylines,
           distance,
@@ -69,20 +75,32 @@ export default class App extends Component {
     } catch (e) {}
   }
 
-  onChange(isActive) {
-    let shouldPaused = !isActive;
+  onChange() {
+    let shouldPaused = !this.state.task.pause;
     if (shouldPaused) {
-      Sport.stop(() => this.setState({ pause: shouldPaused }));
+      Sport.stop(() =>
+        this.setState({
+          task: {
+            stopped: false,
+            pause: true
+          }
+        })
+      );
       Timer.pause();
     } else {
       Sport.start(() => {
         Timer.start(display => {
-          this.setState({ time: display, pause: shouldPaused });
+          this.setState({
+            time: display,
+            task: {
+              stopped: false,
+              pause: false
+            }
+          });
         });
       });
     }
   }
-
   render() {
     const {
       time,
@@ -92,13 +110,17 @@ export default class App extends Component {
       polylines,
       pause,
       speed,
-      debug
+      debug,
+      task
     } = this.state;
     return (
       <AppContainer>
         <DebugView debug={{ ...debug, speed, polylines }} />
         <DisplayView time={time} steps={steps} distance={distance.toFixed(2)}>
-          <Actioner onChange={this.onChange.bind(this, pause)} paused={pause} />
+          <Actioner
+            onChange={this.onChange.bind(this, pause)}
+            paused={task.pause}
+          />
         </DisplayView>
         <MapView region={region} polylines={polylines} />
       </AppContainer>

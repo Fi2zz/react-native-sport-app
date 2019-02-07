@@ -93,12 +93,13 @@ export const DisplayStyle = StyleSheet.create({
     justifyContent: "center"
   }
 });
-export  const ActionerStyle =  StyleSheet.create({
+export const ActionerStyle = StyleSheet.create({
   container: {
     justifyContent: "flex-end",
     alignItems: "flex-end",
     height: 48,
-    marginBottom: 12
+    marginBottom: 12,
+    flexDirection: "row"
   },
   iconImage: {
     width: 24,
@@ -112,4 +113,4 @@ export  const ActionerStyle =  StyleSheet.create({
     alignItems: "center",
     justifyContent: "center"
   }
-})
+});
