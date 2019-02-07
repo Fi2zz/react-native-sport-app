@@ -93,3 +93,23 @@ export const DisplayStyle = StyleSheet.create({
     justifyContent: "center"
   }
 });
+export  const ActionerStyle =  StyleSheet.create({
+  container: {
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    height: 48,
+    marginBottom: 12
+  },
+  iconImage: {
+    width: 24,
+    height: 24
+  },
+  iconContainer: {
+    width: 44,
+    height: 44,
+    backgroundColor: "#05a571",
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center"
+  }
+})

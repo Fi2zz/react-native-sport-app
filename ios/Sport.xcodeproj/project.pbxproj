@@ -20,17 +20,11 @@
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		A8B4E66117B6401AB7EB2444 /* libAirMaps.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B833C4ECE024450A82ED8A49 /* libAirMaps.a */; };
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
-		C429558B2206F6630041F7F0 /* Steps+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C42955752206F6630041F7F0 /* Steps+CoreDataProperties.swift */; };
-		C429558C2206F6630041F7F0 /* StepsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C42955762206F6630041F7F0 /* StepsStore.swift */; };
-		C429558D2206F6630041F7F0 /* Steps+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = C42955772206F6630041F7F0 /* Steps+CoreDataClass.swift */; };
-		C429558F2206F6630041F7F0 /* StepModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C429557A2206F6630041F7F0 /* StepModel.xcdatamodeld */; };
 		C42955912206F6630041F7F0 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = C429557D2206F6630041F7F0 /* LaunchScreen.xib */; };
 		C42955922206F6630041F7F0 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = C42955802206F6630041F7F0 /* Models.swift */; };
 		C42955932206F6630041F7F0 /* HealthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C42955812206F6630041F7F0 /* HealthManager.swift */; };
-		C42955942206F6630041F7F0 /* CoordinateToDistance.swift in Sources */ = {isa = PBXBuildFile; fileRef = C42955822206F6630041F7F0 /* CoordinateToDistance.swift */; };
 		C42955952206F6630041F7F0 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C42955832206F6630041F7F0 /* Images.xcassets */; };
 		C42955962206F6630041F7F0 /* StepManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C42955842206F6630041F7F0 /* StepManager.swift */; };
-		C42955982206F6630041F7F0 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = C42955862206F6630041F7F0 /* Utils.swift */; };
 		C429559A2206F6630041F7F0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C42955882206F6630041F7F0 /* AppDelegate.swift */; };
 		C429559B2206F6630041F7F0 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C42955892206F6630041F7F0 /* LocationManager.swift */; };
 		C42955A822070CE20041F7F0 /* app.json in Resources */ = {isa = PBXBuildFile; fileRef = C42955A722070CE20041F7F0 /* app.json */; };
@@ -333,19 +327,13 @@
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		B833C4ECE024450A82ED8A49 /* libAirMaps.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libAirMaps.a; sourceTree = "<group>"; };
-		C42955752206F6630041F7F0 /* Steps+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Steps+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		C42955762206F6630041F7F0 /* StepsStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StepsStore.swift; sourceTree = "<group>"; };
-		C42955772206F6630041F7F0 /* Steps+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Steps+CoreDataClass.swift"; sourceTree = "<group>"; };
 		C42955782206F6630041F7F0 /* Sport-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Sport-Bridging-Header.h"; sourceTree = "<group>"; };
-		C429557B2206F6630041F7F0 /* StepModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = StepModel.xcdatamodel; sourceTree = "<group>"; };
 		C429557E2206F6630041F7F0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		C429557F2206F6630041F7F0 /* Sport.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Sport.entitlements; sourceTree = "<group>"; };
 		C42955802206F6630041F7F0 /* Models.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		C42955812206F6630041F7F0 /* HealthManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthManager.swift; sourceTree = "<group>"; };
-		C42955822206F6630041F7F0 /* CoordinateToDistance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoordinateToDistance.swift; sourceTree = "<group>"; };
 		C42955832206F6630041F7F0 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		C42955842206F6630041F7F0 /* StepManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StepManager.swift; sourceTree = "<group>"; };
-		C42955862206F6630041F7F0 /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		C42955882206F6630041F7F0 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C42955892206F6630041F7F0 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		C429558A2206F6630041F7F0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -579,19 +567,13 @@
 			children = (
 				C49B7FDB220AFB0100BC4B78 /* SportModule.m */,
 				C49B7FDA220AFB0100BC4B78 /* SportModule.swift */,
-				C42955752206F6630041F7F0 /* Steps+CoreDataProperties.swift */,
-				C42955762206F6630041F7F0 /* StepsStore.swift */,
-				C42955772206F6630041F7F0 /* Steps+CoreDataClass.swift */,
 				C42955782206F6630041F7F0 /* Sport-Bridging-Header.h */,
-				C429557A2206F6630041F7F0 /* StepModel.xcdatamodeld */,
 				C429557D2206F6630041F7F0 /* LaunchScreen.xib */,
 				C429557F2206F6630041F7F0 /* Sport.entitlements */,
 				C42955802206F6630041F7F0 /* Models.swift */,
 				C42955812206F6630041F7F0 /* HealthManager.swift */,
-				C42955822206F6630041F7F0 /* CoordinateToDistance.swift */,
 				C42955832206F6630041F7F0 /* Images.xcassets */,
 				C42955842206F6630041F7F0 /* StepManager.swift */,
-				C42955862206F6630041F7F0 /* Utils.swift */,
 				C42955882206F6630041F7F0 /* AppDelegate.swift */,
 				C42955892206F6630041F7F0 /* LocationManager.swift */,
 				C429558A2206F6630041F7F0 /* Info.plist */,
@@ -1024,18 +1006,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				C429559B2206F6630041F7F0 /* LocationManager.swift in Sources */,
-				C429558F2206F6630041F7F0 /* StepModel.xcdatamodeld in Sources */,
-				C429558B2206F6630041F7F0 /* Steps+CoreDataProperties.swift in Sources */,
 				C429559A2206F6630041F7F0 /* AppDelegate.swift in Sources */,
-				C429558C2206F6630041F7F0 /* StepsStore.swift in Sources */,
-				C429558D2206F6630041F7F0 /* Steps+CoreDataClass.swift in Sources */,
 				C42955922206F6630041F7F0 /* Models.swift in Sources */,
 				C49B7FDD220AFB0100BC4B78 /* SportModule.m in Sources */,
-				C42955942206F6630041F7F0 /* CoordinateToDistance.swift in Sources */,
 				C42955932206F6630041F7F0 /* HealthManager.swift in Sources */,
 				C49B7FDC220AFB0100BC4B78 /* SportModule.swift in Sources */,
 				C42955962206F6630041F7F0 /* StepManager.swift in Sources */,
-				C42955982206F6630041F7F0 /* Utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1254,19 +1230,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		C429557A2206F6630041F7F0 /* StepModel.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				C429557B2206F6630041F7F0 /* StepModel.xcdatamodel */,
-			);
-			currentVersion = C429557B2206F6630041F7F0 /* StepModel.xcdatamodel */;
-			path = StepModel.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = 83CBB9F71A601CBA00E9B192 /* Project object */;
 }

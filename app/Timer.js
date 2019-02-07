@@ -1,14 +1,12 @@
-const pad =v =>v>9?v:`0${v}`;
+const pad = v => (v > 9 ? v : `0${v}`);
 export class Timer {
   hours = 0;
   minutes = 0;
   seconds = 0;
   millseconds = 0;
-
   static instance = new Timer();
   static timer = null;
-
-  runner(handler) {
+  static runner(handler) {
     //定义计时函数
     Timer.instance.millseconds += 50; //毫秒
     if (Timer.instance.millseconds >= 1000) {
@@ -28,9 +26,8 @@ export class Timer {
     let display = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
     handler(display);
   }
-
   static start(handler) {
-    Timer.timer = setInterval(() => Timer.instance.runner(handler), 50);
+    Timer.timer = setInterval(() => Timer.runner(handler), 50);
   }
   static pause() {
     clearInterval(Timer.timer);

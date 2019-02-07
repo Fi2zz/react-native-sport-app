@@ -7,23 +7,14 @@
 //
 
 import Foundation
-
 import HealthKit;
-
 let store = HKHealthStore();
-
-//let healthDataToWrite =
-
 let stepCountType = HKObjectType.quantityType(forIdentifier: .stepCount)!;
 let distanceType = HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!;
-
-
 let healthDataToWrite = Set(arrayLiteral: stepCountType);
 let healthDataToRead = Set([stepCountType, distanceType]);
-
 func noop(_ success: Bool, _ error: Error?) -> Void {
 }
-
 class HealthQueryTypes: NSObject {
     let steps = HKQuantityType.quantityType(forIdentifier: .stepCount)!
     let distance = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning)!
@@ -31,15 +22,10 @@ class HealthQueryTypes: NSObject {
 
 
 public class HealthManager: NSObject {
-
     let QueryTypes = HealthQueryTypes()
     let healthKitStore: HKHealthStore = HKHealthStore()
-
     var authorized: Bool = false;
-
     public func authorization() {
-
-
         store.requestAuthorization(toShare: healthDataToWrite, read: healthDataToRead, completion: {
             (success, error) in
             if (error == nil) {
@@ -55,7 +41,6 @@ public class HealthManager: NSObject {
             self.authorization();
             return;
         }
-//        let endTime = Date();
         let quantity = HKQuantity(unit: HKUnit.count(), doubleValue: steps);
         let sample = HKQuantitySample(type: stepCountType, quantity: quantity, start: startTime, end: endTime)
         //保存步数到健康应用
@@ -63,7 +48,6 @@ public class HealthManager: NSObject {
     }
 
     func createQueryPredicate() -> NSPredicate {
-
         let now = Date()
         let startOfDay = Calendar.current.startOfDay(for: now)
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictStartDate)
@@ -71,9 +55,7 @@ public class HealthManager: NSObject {
 
     }
 
-
     public func query(type: HKQuantityType, handler: @escaping (Double) -> Void, predicate: NSPredicate? = nil) {
-
         let query = HKStatisticsQuery(
                 quantityType: type,
                 quantitySamplePredicate: predicate != nil ? predicate : self.createQueryPredicate(),
@@ -97,6 +79,4 @@ public class HealthManager: NSObject {
         let predicate = HKQuery.predicateForSamples(withStart: prevHour, end: now, options: .strictStartDate)
         self.query(type: self.QueryTypes.distance, handler: handler, predicate: predicate)
     }
-
-
 }

@@ -6,21 +6,6 @@
 import Foundation
 import CoreMotion;
 
-import CoreData;
-
-import HealthKit;
-
-
-struct activityStruct {
-    static let Sitting = "Sitting"
-    static let Walking = "Walking "
-    static let Running = "Running "
-    static let Automotive = "Automotive"
-    static let Unknown = "Unknown"
-    static let Cycling = "Cycling"
-    static let Unavailable = "Unavailable"
-}
-
 
 class StepManager {
     // 加速度传感器采集的原始数组
@@ -41,6 +26,10 @@ class StepManager {
 
     public var dispatch = noopDispatcher;
 
+    static func requiresMainQueueSetup() -> Bool {
+        return false
+    }
+
     func stop() {
         self.motion.stopAccelerometerUpdates();
         self.activity.stopActivityUpdates();
@@ -58,29 +47,22 @@ class StepManager {
     func queryActivityType() {
         if CMMotionActivityManager.isActivityAvailable() {
             self.activity.startActivityUpdates(to: OperationQueue.main) {
-
-
                 (data: CMMotionActivity!) -> Void in
-
                 self.isWalkingOrRunning = data.running || data.walking;
             }
         }
     }
 
     func start() {
-
+        self.health.authorization();
         if (!self.motion.isAccelerometerAvailable) {
             return;
         }
-
         self.queryActivityType()
         self.motion.accelerometerUpdateInterval = StepModel.accelerometerUpdateInterval;
-        self.health.authorization();
         self.startAccelerometer();
     }
 
-    func saveStepsToApp() {
-    }
 
     func saveStepsToHealthKit(steps: Double, start: Date, end: Date) {
         self.health.saveSteps(
@@ -96,13 +78,13 @@ class StepManager {
     func startAccelerometer() {
         let queue = OperationQueue();
         self.motion.startAccelerometerUpdates(to: queue, withHandler: {
+
             (data, error) in
+
 
             guard(self.motion.isAccelerometerActive != false) else {
                 return;
             }
-
-
             let data = data!
             let x = data.acceleration.x;
             let y = data.acceleration.y;
@@ -113,11 +95,9 @@ class StepManager {
             // 加速度传感器采集的原始数组
             self.raw.append(count);
 //            self.rawAcceleration.append(data.acceleration);
-
             // 每采集30条，大约3秒的数据时，进行分析
             if (self.raw.count == 30) {
-
-                self.dataFilter(cache: self.raw);
+                self.calculateAndDispatch(self.raw);
                 self.raw.removeAll(keepingCapacity: true);
 //                self.rawAcceleration.removeAll(keepingCapacity: true)
             }
@@ -125,7 +105,8 @@ class StepManager {
     }
 
 
-    func dataFilter(cache: [StepModel]) {
+    func calculateAndDispatch(_ cache: [StepModel]) {
+
         // 踩点数组
         var sample: [StepModel] = []
         //遍历步数缓存数组
@@ -140,11 +121,7 @@ class StepManager {
                 }
             }
         }
-        self.calculateAndDispatch(sample: sample)
 
-    }
-
-    func calculateAndDispatch(sample: [StepModel]) {
 
         // 踩点过滤
         for current in sample {
@@ -173,12 +150,12 @@ class StepManager {
                     self.currentSteps += 1;
                 }
 
-
                 if (self.isWalkingOrRunning) {
 //                    self.calculateSpeed(self.rawAcceleration.last!)
                     self.dispatch("walk", ["steps": 1]);
+                    let every10Minutes = Int(now.timeIntervalSince1970) - Int(self.dateOfRecording.timeIntervalSince1970) > StepModel.SAVE_INTERVAL
                     //每5分钟记录一次数据
-                    if (Int(now.timeIntervalSince1970) - Int(self.dateOfRecording.timeIntervalSince1970) >= 10 * 60) {
+                    if (every10Minutes && self.currentSteps > 0) {
                         self.saveStepsToHealthKit(steps: Double(self.currentSteps), start: self.dateOfRecording, end: now)
                     }
                 }
@@ -224,7 +201,6 @@ class StepManager {
         let vector = sqrt(pow(accelX, 2) + pow(accelY, 2) + pow(accelZ, 2));
         let acce = vector - self.currentSpeed;
         let velocity = ((acce - self.currentAcceleration) / 2) * StepModel.accelerometerUpdateInterval + self.currentSpeed;
-
 
 
         self.currentAcceleration = acce;

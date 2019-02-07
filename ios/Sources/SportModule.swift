@@ -9,6 +9,8 @@
 import Foundation
 import CoreLocation;
 
+func noopDispatcher(name: String, payload: Any?) -> Void {
+}
 
 @objc(SportModule)
 class SportModule: RCTEventEmitter {
@@ -33,9 +35,9 @@ class SportModule: RCTEventEmitter {
 
     var location = LocationManager()
     var step = StepManager();
-  var isActive = false;
-    override init() {
+    var isActive = false;
 
+    override init() {
         super.init();
 
         func dispatch(name: String, payload: Any?) {
@@ -46,27 +48,20 @@ class SportModule: RCTEventEmitter {
         self.step.dispatch = dispatch
     }
 
-    @objc func start(_ startLocationManager: Bool) {
-      
-      
-      if(self.isActive){
-        self.stop();
-      }
-      
-      
-      self.isActive = true;
-
-        if (startLocationManager != false) {
+    @objc func start(_ startStepManager: Bool) {
+        if (self.isActive) {
+            self.stop();
+        }
+        self.location.start();
+        if (startStepManager == true) {
             self.step.start();
         }
-        self.location.stop();
-        self.location.start();
-
+        self.isActive = true;
 
     }
 
     @objc func stop() {
-      self.isActive = false;
+        self.isActive = false;
         self.location.stop();
         self.step.stop();
     }

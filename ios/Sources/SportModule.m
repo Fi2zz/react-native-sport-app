@@ -14,7 +14,7 @@
 #import <React/RCTEventEmitter.h>
 
 @interface RCT_EXTERN_MODULE (SportModule, RCTEventEmitter)
-RCT_EXTERN_METHOD(start:(BOOL)startLocationManager);
+RCT_EXTERN_METHOD(start:(BOOL)startStepManager);
 RCT_EXTERN_METHOD(stop);
 @end
 

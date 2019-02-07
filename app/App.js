@@ -1,14 +1,14 @@
 import React, { Component } from "react";
-import { View, Text } from "react-native";
-import DisplayView from "./DisplayView";
-import MapView from "./MapView";
-import { ControlBar } from "./ControlBar";
-import { Sport } from "./NativeModules";
+import {
+  DebugView,
+  DisplayView,
+  MapView,
+  Actioner,
+  AppContainer
+} from "./Components";
+import { Sport } from "./SportModule";
 import { Timer } from "./Timer";
-import { AppStyle as styles } from "./styles";
 import { DELTA } from "./utils";
-import { DebugView } from "./DebugView";
-
 export default class App extends Component {
   state = {
     steps: 0,
@@ -95,20 +95,13 @@ export default class App extends Component {
       debug
     } = this.state;
     return (
-      <View style={styles.container}>
+      <AppContainer>
         <DebugView debug={{ ...debug, speed, polylines }} />
         <DisplayView time={time} steps={steps} distance={distance.toFixed(2)}>
-          <ControlBar
-            onChange={this.onChange.bind(this, pause)}
-            paused={pause}
-          />
+          <Actioner onChange={this.onChange.bind(this, pause)} paused={pause} />
         </DisplayView>
-        <MapView
-          region={region}
-          polylines={polylines}
-          followsUserLocation={true}
-        />
-      </View>
+        <MapView region={region} polylines={polylines} />
+      </AppContainer>
     );
   }
 }
