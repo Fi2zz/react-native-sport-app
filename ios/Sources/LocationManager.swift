@@ -38,16 +38,18 @@ func getDistance(_ first: CLLocationCoordinate2D, _ second: CLLocationCoordinate
     let sinLngDelta = sin(deltaLng / 2);
     let sinLatDelta = sin(deltaLat / 2);
   
-  let powOfLatDelta = pow(sinLngDelta,2)
-  let coses = cos(radLat1) *  cos(radLat2);
-  let   delta = powOfLatDelta + (sinLatDelta * coses)
-  let square = sqrt(delta);
-  let doulbeAndAsin = 2 * asin(square);
-  let withEarthRadius =  doulbeAndAsin * EARTH_RADIUS
-  let withRound = round(withEarthRadius * 10000) / 1000;
+    let powOfLatDelta = pow(sinLngDelta,2)
+    let coses = cos(radLat1) *  cos(radLat2);
+    let delta = powOfLatDelta + (sinLatDelta * coses)
+    let square = sqrt(delta);
+
+    let doulbeAndAsin = 2 * asin(square);
+    
+    let withEarthRadius =  doulbeAndAsin * EARTH_RADIUS
+    let withRound = round(withEarthRadius * 10000) / 1000;
   
-  let withKMDelta = withRound * KM_DELTA
-  return withKMDelta
+    let withKMDelta = withRound * KM_DELTA
+    return withKMDelta
 
 }
 
@@ -96,53 +98,45 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             }
             let location = placemarks?.first?.location;
             let coordinate = location!.coordinate;
+             //水平方向精度小于0表示数据不可信
+             guard (location!.horizontalAccuracy >= 0.0 ) else {
+               return ;
+             }
           
-          guard (location!.horizontalAccuracy >= 0.0 ) else {
-            return ;
-          }
           
-          
-            var distance = 0.0
-          
-          if(location!.course > 0){
-            distance = getDistance(coordinate, self.currentCoordinate)
-          
-          }
-          
-      
-          
-            let totalDistance = distance + self.totalDistance
-            self.dispatch(
-                    SportModule.events.locationUpdated,
-                    [
-                        "coordinate": [
-                            "latitude": coordinate.latitude,
-                            "longitude": coordinate.longitude,
-                        ],
-                        "distance": totalDistance,
-                        "accuracy":[
-                            "horizontal":location?.horizontalAccuracy,
-                            "vertical":location?.verticalAccuracy,
-                        ],
-                        "altitude":location!.altitude,
-                        "course":location!.course
+              var distance = 0.0
+              //course小于0表示数据不可信
+              if(location!.course > 0){
+                distance = getDistance(coordinate, self.currentCoordinate)
+              }
+              let totalDistance = distance + self.totalDistance
+              self.dispatch(
+                        SportModule.events.locationUpdated,
+                        [
+                            "coordinate": [
+                                "latitude": coordinate.latitude,
+                                "longitude": coordinate.longitude,
+                            ],
+                            "distance": totalDistance,
+                            "accuracy":[
+                                "horizontal":location?.horizontalAccuracy,
+                                "vertical":location?.verticalAccuracy,
+                            ],
+                            "altitude":location!.altitude,
+                            "course":location!.course
 
-                    ]
-            )
-          self.totalDistance = totalDistance;
-          self.currentCoordinate = coordinate;
-          self.currentLocation = location;
+                        ]
+                )
+              self.totalDistance = totalDistance;
+              self.currentCoordinate = coordinate;
+              self.currentLocation = location;
           
         })
       
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-
         self.dispatch(SportModule.events.locationHeadingUpdated, ["heading": newHeading.trueHeading])
-
-//        print("newHeading \(newHeading)")
-
     }
 
     func stop() {

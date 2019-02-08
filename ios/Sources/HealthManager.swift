@@ -35,8 +35,6 @@ public class HealthManager: NSObject {
     }
 
     public func saveSteps(steps: Double, startTime: Date, endTime: Date) {
-
-
         guard self.authorized else {
             self.authorization();
             return;

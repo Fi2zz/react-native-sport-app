@@ -30,7 +30,7 @@ class SportModule: RCTEventEmitter {
 
     static let events = SportModuleEvents();
   
-  let motion = CMMotionManager();
+    let motion = CMMotionManager();
 
     override func supportedEvents() -> [String]! {
         return [

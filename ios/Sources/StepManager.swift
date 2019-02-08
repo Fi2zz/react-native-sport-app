@@ -77,7 +77,7 @@ class StepManager {
         self.motion.startAccelerometerUpdates(to: queue, withHandler: {
 
             (data, error) in
-          
+
             guard(self.motion.isAccelerometerActive != false) else {
                 return;
             }
@@ -90,7 +90,7 @@ class StepManager {
             let count = StepModel(range: range, date: Date())
             // 加速度传感器采集的原始数组
             self.raw.append(count);
-          // 每采集10条，大约1.2秒的数据时，进行分析
+            // 每采集10条，大约1.2秒的数据时，进行分析
             if (self.raw.count == 10) {
                 self.calculateAndDispatch(self.raw);
                 self.raw.removeAll(keepingCapacity: true);
@@ -144,7 +144,6 @@ class StepManager {
                 }
 
                 if (self.isWalkingOrRunning) {
-                  
                     self.dispatch(SportModule.events.walk, ["steps": 1]);
                     let every10Minutes = Int(now.timeIntervalSince1970) - Int(self.dateOfRecording.timeIntervalSince1970) > StepModel.SAVE_INTERVAL
                     //每5分钟记录一次数据

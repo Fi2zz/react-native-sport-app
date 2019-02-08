@@ -7,8 +7,6 @@
 #import <React/RCTConvert.h>
 #import <React/RCTEventEmitter.h>
 #import <React/RCTBundleURLProvider.h>
-
 #import <React/RCTUtils.h>
-
 #import <React/RCTRootView.h>
 
