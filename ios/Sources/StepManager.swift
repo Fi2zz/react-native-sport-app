@@ -6,10 +6,9 @@
 import Foundation
 import CoreMotion;
 
-
 class StepManager {
 
-    let rangeDelta = -0.15;
+    let rangeDelta = -0.12;
     // 加速度传感器采集的原始数组
     var raw: [StepModel] = [];
     var rawAcceleration: [CMAcceleration] = []
@@ -17,9 +16,7 @@ class StepManager {
     var stepsOfRecording: Int = 0;
     var currentSteps: Int = 0;
     var isWalkingOrRunning = false;
-    var currentSpeed: Double = 0.0;
-    var currentAcceleration: Double = 0.0;
-    //motion manager
+  //motion manager
     let motion = CMMotionManager();
     //health manager
     let health = HealthManager();
@@ -80,6 +77,7 @@ class StepManager {
         self.motion.startAccelerometerUpdates(to: queue, withHandler: {
 
             (data, error) in
+          
             guard(self.motion.isAccelerometerActive != false) else {
                 return;
             }
@@ -92,12 +90,10 @@ class StepManager {
             let count = StepModel(range: range, date: Date())
             // 加速度传感器采集的原始数组
             self.raw.append(count);
-//            self.rawAcceleration.append(data.acceleration);
-            // 每采集30条，大约3秒的数据时，进行分析
-            if (self.raw.count == 30) {
+          // 每采集10条，大约1.2秒的数据时，进行分析
+            if (self.raw.count == 10) {
                 self.calculateAndDispatch(self.raw);
                 self.raw.removeAll(keepingCapacity: true);
-//                self.rawAcceleration.removeAll(keepingCapacity: true)
             }
         })
     }
@@ -148,7 +144,7 @@ class StepManager {
                 }
 
                 if (self.isWalkingOrRunning) {
-//                    self.calculateSpeed(self.rawAcceleration.last!)
+                  
                     self.dispatch(SportModule.events.walk, ["steps": 1]);
                     let every10Minutes = Int(now.timeIntervalSince1970) - Int(self.dateOfRecording.timeIntervalSince1970) > StepModel.SAVE_INTERVAL
                     //每5分钟记录一次数据
@@ -174,40 +170,7 @@ class StepManager {
 
     }
 
-    var gravX = 0.0;
-
-    var gravY = 0.0;
-
-    var gravZ = 0.0;
-
-    func calculateSpeed(_ acceleration: CMAcceleration) {
-
-        let kFilteringFactor = 0.1;
-        let currGravX = (acceleration.x * kFilteringFactor) + (self.gravX * (1.0 - kFilteringFactor));
-        let currGravY = (acceleration.y * kFilteringFactor) + (self.gravY * (1.0 - kFilteringFactor));
-        let currGravZ = (acceleration.z * kFilteringFactor) + (self.gravZ * (1.0 - kFilteringFactor));
-        var accelX = acceleration.x - ((acceleration.x * kFilteringFactor) + (currGravX * (1.0 - kFilteringFactor)));
-        var accelY = acceleration.y - ((acceleration.y * kFilteringFactor) + (currGravY * (1.0 - kFilteringFactor)));
-        var accelZ = acceleration.z - ((acceleration.z * kFilteringFactor) + (currGravZ * (1.0 - kFilteringFactor)));
-
-        accelX = self.tendToZero(accelX * 9.81)
-        accelY = self.tendToZero(accelY * 9.81)
-        accelZ = self.tendToZero(accelZ * 9.81);
-
-
-        let vector = sqrt(pow(accelX, 2) + pow(accelY, 2) + pow(accelZ, 2));
-        let acce = vector - self.currentSpeed;
-        let velocity = ((acce - self.currentAcceleration) / 2) * StepModel.accelerometerUpdateInterval + self.currentSpeed;
-
-
-        self.currentAcceleration = acce;
-        self.currentSpeed = velocity
-        self.gravX = currGravX;
-        self.gravY = currGravY;
-        self.gravZ = currGravZ;
-
-
-    }
-
+ 
+  
 
 }

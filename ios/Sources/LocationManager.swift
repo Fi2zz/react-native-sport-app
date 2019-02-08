@@ -15,7 +15,7 @@ let COORDINATE_CHANGE_DELTA = pow(COORDINATE_LNG_DELTA, 2)
 let EARTH_RADIUS = 6378.137;
 let KM_DELTA = 1.609344;
 
-func getRadius(_ input: Double) -> Double {
+func rad(_ input: Double) -> Double {
     let pie = Double.pi;
     return input * pie / 180.0
 }
@@ -27,24 +27,27 @@ func getDistance(_ first: CLLocationCoordinate2D, _ second: CLLocationCoordinate
         return 0.0;
     }
 
-    let radLat1 = getRadius(first.latitude);
-    let radLat2 = getRadius(second!.latitude);
-    let radLng1 = getRadius(first.latitude);
-    let radLng2 = getRadius(second!.latitude);
+    let radLat1 = rad(first.latitude);
+    let radLat2 = rad(second!.latitude);
+    let radLng1 = rad(first.latitude);
+    let radLng2 = rad(second!.latitude);
 
     let deltaLat = radLat1 - radLat1;
     let deltaLng = radLng1 - radLng2;
 
-    let sinLng = sin(deltaLng / 2);
-    let sinLat = sin(deltaLat / 2);
-
-    let cos1 = cos(radLat1);
-    let cos2 = cos(radLat2);
-    let result = (pow(sinLng, 2) * cos2 * cos1) + sinLat;
-    let miles = asin(sqrt(pow(result, 2))) * 2 * EARTH_RADIUS * 1000;
-
-    return round(miles) / 1000 * KM_DELTA
-
+    let sinLngDelta = sin(deltaLng / 2);
+    let sinLatDelta = sin(deltaLat / 2);
+  
+  let powOfLatDelta = pow(sinLngDelta,2)
+  let coses = cos(radLat1) *  cos(radLat2);
+  let   delta = powOfLatDelta + (sinLatDelta * coses)
+  let square = sqrt(delta);
+  let doulbeAndAsin = 2 * asin(square);
+  let withEarthRadius =  doulbeAndAsin * EARTH_RADIUS
+  let withRound = round(withEarthRadius * 10000) / 1000;
+  
+  let withKMDelta = withRound * KM_DELTA
+  return withKMDelta
 
 }
 
@@ -52,6 +55,7 @@ func getDistance(_ first: CLLocationCoordinate2D, _ second: CLLocationCoordinate
 class LocationManager: NSObject, CLLocationManagerDelegate {
     public var manager: CLLocationManager;
     var currentCoordinate: CLLocationCoordinate2D?;
+    var currentLocation:CLLocation?
     var totalDistance: Double = 0.0;
     var isActive = false;
     public var dispatch = noopDispatcher
@@ -92,7 +96,22 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             }
             let location = placemarks?.first?.location;
             let coordinate = location!.coordinate;
-            let distance = getDistance(coordinate, self.currentCoordinate)
+          
+          guard (location!.horizontalAccuracy >= 0.0 ) else {
+            return ;
+          }
+          
+          
+            var distance = 0.0
+          
+          if(location!.course > 0){
+            distance = getDistance(coordinate, self.currentCoordinate)
+          
+          }
+          
+      
+          
+            let totalDistance = distance + self.totalDistance
             self.dispatch(
                     SportModule.events.locationUpdated,
                     [
@@ -100,17 +119,19 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                             "latitude": coordinate.latitude,
                             "longitude": coordinate.longitude,
                         ],
-                        "distance": distance,
+                        "distance": totalDistance,
                         "accuracy":[
                             "horizontal":location?.horizontalAccuracy,
                             "vertical":location?.verticalAccuracy,
                         ],
-                        "altitude":location!.altitude
+                        "altitude":location!.altitude,
+                        "course":location!.course
 
                     ]
             )
-          self.totalDistance = distance + self.totalDistance;
+          self.totalDistance = totalDistance;
           self.currentCoordinate = coordinate;
+          self.currentLocation = location;
           
         })
       
@@ -118,7 +139,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
 
-//        self.dispatch(SportModule.events.locationHeadingUpdated, ["heading": newHeading.trueHeading])
+        self.dispatch(SportModule.events.locationHeadingUpdated, ["heading": newHeading.trueHeading])
 
 //        print("newHeading \(newHeading)")
 

@@ -14,7 +14,7 @@ class StepModel: NSObject {
     static let ACCELEROMETER_START_TIME: Int = 2;
     static let ACCELEROMETER_START_STEP: Int = 0;
     static let DB_STEP_INTERVAL: Int = 1;
-    static let accelerometerUpdateInterval = 1.0 / 50;
+    static let accelerometerUpdateInterval = 1.0 / 30.0;
     //写入health data的时间间隔
     static let SAVE_INTERVAL: Int = 60 * 10 * 10
     var date: Date?;

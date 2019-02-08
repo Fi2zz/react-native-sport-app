@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreLocation;
+import CoreMotion;
 
 func noopDispatcher(name: String, payload: Any?) -> Void {
 }
@@ -28,6 +29,8 @@ public class SportModuleEvents {
 class SportModule: RCTEventEmitter {
 
     static let events = SportModuleEvents();
+  
+  let motion = CMMotionManager();
 
     override func supportedEvents() -> [String]! {
         return [
@@ -62,6 +65,7 @@ class SportModule: RCTEventEmitter {
     }
 
     @objc func start(_ shouldStartStepManager: Bool) -> Void {
+
         if (self.isActive) {
             self.stop(true);
         }
@@ -80,10 +84,8 @@ class SportModule: RCTEventEmitter {
         self.step.stop();
     }
 
-
 }
 
 
-func updateTime() {
-    print("updateTime")
-}
+
+

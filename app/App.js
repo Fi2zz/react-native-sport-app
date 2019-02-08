@@ -27,7 +27,8 @@ export default class App extends Component {
       vertical: 0,
       horizontal: 0
     },
-    heading: 0.0
+    heading: 0.0,
+    course:0.0
   };
 
   componentDidMount() {
@@ -40,15 +41,21 @@ export default class App extends Component {
           steps: data.steps + this.state.steps
         });
       });
+      Sport.addListener("locationHeadingUpdated", ({heading}) => {
+        this.setState({
+          heading
+        });
+      });
 
       Sport.addListener("locationUpdated", data => {
-        const { coordinate, distance, accuracy } = data;
+        const { coordinate, distance, accuracy,course } = data;
         const { polylines } = this.state;
         this.setState({
           polylines: [...polylines, coordinate],
           distance,
           coordinate,
-          accuracy
+          accuracy,
+          course
         });
       });
       Sport.start();
@@ -92,7 +99,8 @@ export default class App extends Component {
       coordinate,
       altitude,
       accuracy,
-      heading
+      heading,
+      course
     } = this.state;
     return (
       <AppContainer>
@@ -102,6 +110,7 @@ export default class App extends Component {
           altitude={(altitude + accuracy.vertical).toFixed(2)}
           accuracy={accuracy}
           heading={heading}
+          course={course}
         />
         <DisplayView time={time} steps={steps} distance={distance.toFixed(2)}>
           <Actioner

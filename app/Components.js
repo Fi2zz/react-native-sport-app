@@ -98,14 +98,14 @@ export function Actioner(props) {
   );
 }
 
-export function InfoView({ latitude, longitude, altitude, accuracy }) {
+export function InfoView({ course,latitude, longitude, altitude, accuracy,heading }) {
   return (
     <View style={InfoStyle.container}>
       <SafeAreaView forceInset={{ top: "always" }}>
         <Text style={InfoStyle.label}>
           {altitude} m / h:
           {accuracy.horizontal} / v:
-          {accuracy.vertical}
+          {accuracy.vertical} / c: {course} / hd:{heading}
         </Text>
         <Text style={InfoStyle.label}>
           lat: {latitude} / lng:
