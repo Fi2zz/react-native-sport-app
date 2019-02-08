@@ -8,10 +8,11 @@ import CoreMotion;
 
 
 class StepManager {
+
+    let rangeDelta = -0.15;
     // 加速度传感器采集的原始数组
     var raw: [StepModel] = [];
     var rawAcceleration: [CMAcceleration] = []
-
     var dateOfRecording: Date = Date();
     var stepsOfRecording: Int = 0;
     var currentSteps: Int = 0;
@@ -23,7 +24,6 @@ class StepManager {
     //health manager
     let health = HealthManager();
     let activity = CMMotionActivityManager();
-
     public var dispatch = noopDispatcher;
 
     static func requiresMainQueueSetup() -> Bool {
@@ -40,11 +40,11 @@ class StepManager {
         //启动时查询步数
         let stepsQueryType = self.health.QueryTypes.steps;
         self.health.query(type: stepsQueryType, handler: { (steps) -> Void in
-            self.dispatch("start", ["steps": Int(steps)])
+            self.dispatch(SportModule.events.start, ["steps": Int(steps)])
         })
     }
 
-    func queryActivityType() {
+    func activityUpdates() {
         if CMMotionActivityManager.isActivityAvailable() {
             self.activity.startActivityUpdates(to: OperationQueue.main) {
                 (data: CMMotionActivity!) -> Void in
@@ -58,7 +58,7 @@ class StepManager {
         if (!self.motion.isAccelerometerAvailable) {
             return;
         }
-        self.queryActivityType()
+        self.activityUpdates()
         self.motion.accelerometerUpdateInterval = StepModel.accelerometerUpdateInterval;
         self.startAccelerometer();
     }
@@ -80,8 +80,6 @@ class StepManager {
         self.motion.startAccelerometerUpdates(to: queue, withHandler: {
 
             (data, error) in
-
-
             guard(self.motion.isAccelerometerActive != false) else {
                 return;
             }
@@ -115,7 +113,7 @@ class StepManager {
             if (index >= 1 && index < cache.count - 2) {
                 let prev = cache[index - 1];
                 let next = cache[index + 1];
-                let con = current.range < -0.15 && current.range < prev.range && current.range < next.range
+                let con = current.range < self.rangeDelta && current.range < prev.range && current.range < next.range
                 if (con) {
                     sample.append(current)
                 }
@@ -125,7 +123,6 @@ class StepManager {
 
         // 踩点过滤
         for current in sample {
-
 
             let now = Date();
             let interval = current.date!.timeIntervalSince(self.dateOfRecording) * 1000;
@@ -152,7 +149,7 @@ class StepManager {
 
                 if (self.isWalkingOrRunning) {
 //                    self.calculateSpeed(self.rawAcceleration.last!)
-                    self.dispatch("walk", ["steps": 1]);
+                    self.dispatch(SportModule.events.walk, ["steps": 1]);
                     let every10Minutes = Int(now.timeIntervalSince1970) - Int(self.dateOfRecording.timeIntervalSince1970) > StepModel.SAVE_INTERVAL
                     //每5分钟记录一次数据
                     if (every10Minutes && self.currentSteps > 0) {

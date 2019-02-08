@@ -19,12 +19,36 @@ export const AppStyle = StyleSheet.create({
   counterViewChildrenContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    // justifyContent: "space-between",
     zIndex: 25,
-    padding: 20
-    // backgroundColor: "#fff"
+    padding: 20,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    width: screenWidth
   },
   debugLabel: {
+    fontSize: 12,
+    marginBottom: 2,
+    textAlign: "left"
+  }
+});
+
+export const InfoStyle = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    zIndex: 25,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    width: screenWidth
+  },
+  label: {
     fontSize: 12,
     marginBottom: 2,
     textAlign: "left"

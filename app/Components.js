@@ -1,8 +1,15 @@
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { AppStyle, MapStyle, DisplayStyle, ActionerStyle } from "./styles";
-import MapContainer, { Polyline } from "react-native-maps";
+import {
+  AppStyle,
+  MapStyle,
+  DisplayStyle,
+  ActionerStyle,
+  InfoStyle
+} from "./styles";
+import MapContainer, { Polyline, Marker } from "react-native-maps";
 import SafeAreaView from "react-native-safe-area-view";
+import { DELTA } from "./utils";
 
 const source = {
   start: require("./assets/icon-start.png"),
@@ -16,8 +23,8 @@ export function AppContainer(props) {
 }
 
 export function MapView(props) {
-  const { polylines, region } = props;
-  if (!region.latitude || !region.longitude) {
+  const { polylines, heading, coordinate } = props;
+  if (!coordinate.latitude || !coordinate.longitude) {
     return (
       <View style={MapStyle.container}>
         <Text>Loading</Text>
@@ -33,7 +40,7 @@ export function MapView(props) {
       showsTraffic={true}
       loadingEnabled={true}
       zoomEnabled={true}
-      initialRegion={region}
+      initialRegion={{ ...coordinate, ...DELTA }}
       style={MapStyle.container}
       followsUserLocation={true}
       showsBuildings={true}
@@ -91,29 +98,35 @@ export function Actioner(props) {
   );
 }
 
-export function DebugView({ debug }) {
-  const { comparation, coordinate, speed, polylines, shouldDispatch } = debug;
+export function InfoView({ latitude, longitude, altitude, accuracy }) {
   return (
-    <View style={AppStyle.counterViewChildrenContainer}>
+    <View style={InfoStyle.container}>
       <SafeAreaView forceInset={{ top: "always" }}>
-        <Text style={AppStyle.debugLabel}>comparation</Text>
-        <Text style={AppStyle.debugLabel}>
-          lat:
-          {comparation.lat} / lng:
-          {comparation.lng}
+        <Text style={InfoStyle.label}>
+          {altitude} m / h:
+          {accuracy.horizontal} / v:
+          {accuracy.vertical}
         </Text>
-        <Text style={AppStyle.debugLabel}>coordinate</Text>
-        <Text style={AppStyle.debugLabel}>
-          lat:
-          {coordinate.latitude} / lng:
-          {coordinate.longitude}
-        </Text>
-        <Text style={AppStyle.debugLabel}>
-          location changed: {shouldDispatch.toString()} / speed:
-          {speed} / polylines:
-          {polylines.length}
+        <Text style={InfoStyle.label}>
+          lat: {latitude} / lng:
+          {longitude}
         </Text>
       </SafeAreaView>
+    </View>
+  );
+}
+
+export function LocationMarker({ rotation }) {
+  return (
+    <View>
+      <Image
+        source={require("./assets/icon-location.png")}
+        style={{
+          width: 24,
+          height: 24,
+          transform: [{ rotate: `${rotation}` }]
+        }}
+      />
     </View>
   );
 }

@@ -31,8 +31,10 @@ func getDistance(_ first: CLLocationCoordinate2D, _ second: CLLocationCoordinate
     let radLat2 = getRadius(second!.latitude);
     let radLng1 = getRadius(first.latitude);
     let radLng2 = getRadius(second!.latitude);
+
     let deltaLat = radLat1 - radLat1;
     let deltaLng = radLng1 - radLng2;
+
     let sinLng = sin(deltaLng / 2);
     let sinLat = sin(deltaLat / 2);
 
@@ -40,35 +42,16 @@ func getDistance(_ first: CLLocationCoordinate2D, _ second: CLLocationCoordinate
     let cos2 = cos(radLat2);
     let result = (pow(sinLng, 2) * cos2 * cos1) + sinLat;
     let miles = asin(sqrt(pow(result, 2))) * 2 * EARTH_RADIUS * 1000;
+
     return round(miles) / 1000 * KM_DELTA
 
 
 }
 
 
-func getDeltaBetweenCoordinates(_ v1: CLLocationCoordinate2D, _ v2: CLLocationCoordinate2D?) -> Dictionary<String, Double> {
-    if (v2 == nil) {
-        return ["latitude": 0.0, "longitude": 0.0]
-    }
-    let latDelta = pow(v1.latitude - v2!.latitude, 2);
-    let lngDelta = pow(v1.longitude - v2!.longitude, 2);
-    return ["latitude": latDelta, "longitude": lngDelta]
-}
-
-func CheckIfCanDispatchEvent(_ v1: CLLocationCoordinate2D, _ v2: CLLocationCoordinate2D?) -> Bool {
-    if (v2 == nil) {
-        return true;
-    }
-    let deltas = getDeltaBetweenCoordinates(v1, v2!);
-    let longitude = Double(deltas["longitude"]!)
-    let latitude = Double(deltas["latitude"]!)
-    return latitude > COORDINATE_CHANGE_DELTA && longitude > COORDINATE_CHANGE_DELTA;
-}
-
-
 class LocationManager: NSObject, CLLocationManagerDelegate {
     public var manager: CLLocationManager;
-    var lastCoordinate: CLLocationCoordinate2D?;
+    var currentCoordinate: CLLocationCoordinate2D?;
     var totalDistance: Double = 0.0;
     var isActive = false;
     public var dispatch = noopDispatcher
@@ -93,7 +76,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        self.dispatch("onWarning", ["onWarning"])
+        self.dispatch(SportModule.events.locationWarning, ["onWarning"])
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -108,52 +91,36 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                 return;
             }
             let location = placemarks?.first?.location;
-            let currCoordinate = location!.coordinate;
-            let shouldDispatch = CheckIfCanDispatchEvent(currCoordinate, self.lastCoordinate)
-            let comparation = getDeltaBetweenCoordinates(currCoordinate, self.lastCoordinate)
-
-
-            //payload
-            let coordinate = [
-                "latitude": currCoordinate.latitude,
-                "longitude": currCoordinate.longitude,
-            ]
-
-            let comp = [
-                "lat": comparation["latitude"],
-                "lng": comparation["longitude"]
-            ]
-
-
+            let coordinate = location!.coordinate;
+            let distance = getDistance(coordinate, self.currentCoordinate)
             self.dispatch(
-                    "comparation",
+                    SportModule.events.locationUpdated,
                     [
-                        "shouldDispatch": shouldDispatch,
-                        "coordinate": coordinate,
-                        "comparation": comp,
-                    ])
-            if (shouldDispatch == true) {
+                        "coordinate": [
+                            "latitude": coordinate.latitude,
+                            "longitude": coordinate.longitude,
+                        ],
+                        "distance": distance,
+                        "accuracy":[
+                            "horizontal":location?.horizontalAccuracy,
+                            "vertical":location?.verticalAccuracy,
+                        ],
+                        "altitude":location!.altitude
 
-                let distance = getDistance(currCoordinate, self.lastCoordinate)
-                self.totalDistance = distance + self.totalDistance;
-                self.dispatch(
-                        "locationUpdated",
-                        [
-                            "coordinate": coordinate,
-                            "distance": distance,
-                        ])
-
-
-            }
-
-            self.lastCoordinate = currCoordinate;
-//            self.lastLocation = location;
+                    ]
+            )
+          self.totalDistance = distance + self.totalDistance;
+          self.currentCoordinate = coordinate;
+          
         })
-
+      
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
 
+//        self.dispatch(SportModule.events.locationHeadingUpdated, ["heading": newHeading.trueHeading])
+
+//        print("newHeading \(newHeading)")
 
     }
 

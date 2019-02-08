@@ -12,19 +12,32 @@ import CoreLocation;
 func noopDispatcher(name: String, payload: Any?) -> Void {
 }
 
+
+public class SportModuleEvents {
+    let start = "start"
+    let walk = "walk"
+    let activity = "activity"
+    let locationAuthorizationStatusDidChange = "locationAuthorizationStatusDidChange"
+    let locationHeadingUpdated = "locationHeadingUpdated"
+    let locationUpdated = "locationUpdated"
+    let locationWarning = "locationWarning"
+}
+
+
 @objc(SportModule)
 class SportModule: RCTEventEmitter {
+
+    static let events = SportModuleEvents();
+
     override func supportedEvents() -> [String]! {
         return [
-
-            "start",
-            "walk",
-            "activity",
-            "speed",
-            "locationAuthorizationStatusDidChange",
-            "locationHeadingUpdated",
-            "locationUpdated",
-            "locationWarning"
+            SportModule.events.activity,
+            SportModule.events.walk,
+            SportModule.events.start,
+            SportModule.events.locationAuthorizationStatusDidChange,
+            SportModule.events.locationHeadingUpdated,
+            SportModule.events.locationUpdated,
+            SportModule.events.locationWarning,
         ]
     }
 
@@ -48,24 +61,29 @@ class SportModule: RCTEventEmitter {
         self.step.dispatch = dispatch
     }
 
-    @objc func start(_ startStepManager: Bool) {
+    @objc func start(_ shouldStartStepManager: Bool) -> Void {
         if (self.isActive) {
-            self.stop();
+            self.stop(true);
         }
         self.location.start();
-        if (startStepManager == true) {
+        if (shouldStartStepManager == true) {
             self.step.start();
         }
         self.isActive = true;
-
     }
 
-    @objc func stop() {
+    @objc func stop(_ shouldStopUpdateLocation: Bool) -> Void {
         self.isActive = false;
-        self.location.stop();
+        if (shouldStopUpdateLocation == true) {
+            self.location.stop();
+        }
         self.step.stop();
     }
 
 
 }
 
+
+func updateTime() {
+    print("updateTime")
+}

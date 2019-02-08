@@ -1,4 +1,6 @@
 const pad = v => (v > 9 ? v : `0${v}`);
+
+import BackgroundTimer from "react-native-background-timer";
 export class Timer {
   hours = 0;
   minutes = 0;
@@ -21,19 +23,14 @@ export class Timer {
       Timer.instance.minutes = 0;
       Timer.instance.hours += 1;
     }
-
     const { hours, minutes, seconds } = Timer.instance;
     let display = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
     handler(display);
   }
-  static start(handler) {
-    Timer.timer = setInterval(() => Timer.runner(handler), 50);
-  }
-  static pause() {
-    clearInterval(Timer.timer);
-  }
+  static start=(handler) => Timer.timer = BackgroundTimer.setInterval(() => Timer.runner(handler), 50);
+  static pause=()=>    BackgroundTimer.clearInterval(Timer.timer);
   static stop() {
-    clearInterval(Timer.timer);
+    BackgroundTimer.clearInterval(Timer.timer);
     Timer.timer = null;
   }
 }

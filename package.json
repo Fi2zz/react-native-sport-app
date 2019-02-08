@@ -1,27 +1,21 @@
 {
-  "name": "pedometer",
+  "name": "react-native-step-app",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest",
-    "build": "react-native  run-ios --configuration release --udid  00008020-000979901412002E --scheme release",
-    "build:debug": "react-native  run-ios --configuration debug --udid  00008020-000979901412002E --scheme pedometer"
+    "ios": "react-native run-ios"
   },
   "dependencies": {
     "react": "16.6.3",
     "react-native": "0.58.1",
+    "react-native-background-timer": "^2.1.1",
     "react-native-maps": "^0.23.0",
     "react-native-safe-area-view": "^0.12.0"
   },
   "devDependencies": {
     "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "24.0.0",
-    "jest": "24.0.0",
-    "metro-react-native-babel-preset": "0.51.1",
-    "react-test-renderer": "16.6.3"
-  },
-  "jest": {
-    "preset": "react-native"
+    "metro-react-native-babel-preset": "0.51.1"
   }
 }

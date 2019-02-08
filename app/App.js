@@ -1,39 +1,33 @@
 import React, { Component } from "react";
+import { Animated, Image } from "react-native";
 import {
-  DebugView,
+  InfoView,
   DisplayView,
   MapView,
   Actioner,
-  AppContainer
+  AppContainer,
+  LocationMarker
 } from "./Components";
 import { Sport } from "./SportModule";
 import { Timer } from "./Timer";
-import { DELTA } from "./utils";
 export default class App extends Component {
   state = {
     steps: 0,
-    region: {
-      latitude: null,
-      longitude: null,
-      ...DELTA
-    },
     polylines: [],
     distance: 0.0,
     time: "00:00:00",
-    speed: 0.0,
-    debug: {
-      shouldDispatch: true,
-      comparation: {
-        lat: null,
-        lng: null
-      },
-      coordinate: {}
-    },
+    coordinate: {},
+    altitude: 0.0,
     task: {
       stopped: true,
       pause: true,
       reset: false
-    }
+    },
+    accuracy: {
+      vertical: 0,
+      horizontal: 0
+    },
+    heading: 0.0
   };
 
   componentDidMount() {
@@ -43,32 +37,18 @@ export default class App extends Component {
     try {
       Sport.addListener("walk", data => {
         this.setState({
-          steps: data.steps + this.state.steps,
-          speed: data.speed
+          steps: data.steps + this.state.steps
         });
       });
-      Sport.addListener(
-        "comparation",
-        ({ shouldDispatch, coordinate, comparation }) => {
-          this.setState({
-            debug: {
-              shouldDispatch,
-              coordinate,
-              comparation
-            }
-          });
-        }
-      );
+
       Sport.addListener("locationUpdated", data => {
-        const { coordinate, distance } = data;
-        let { polylines, region } = this.state;
-
-        polylines.push(coordinate);
-
+        const { coordinate, distance, accuracy } = data;
+        const { polylines } = this.state;
         this.setState({
-          polylines,
+          polylines: [...polylines, coordinate],
           distance,
-          region: { region, ...coordinate }
+          coordinate,
+          accuracy
         });
       });
       Sport.start();
@@ -106,23 +86,30 @@ export default class App extends Component {
       time,
       steps,
       distance,
-      region,
       polylines,
       pause,
-      speed,
-      debug,
-      task
+      task,
+      coordinate,
+      altitude,
+      accuracy,
+      heading
     } = this.state;
     return (
       <AppContainer>
-        <DebugView debug={{ ...debug, speed, polylines }} />
+        <InfoView
+          latitude={coordinate.latitude}
+          longitude={coordinate.longitude}
+          altitude={(altitude + accuracy.vertical).toFixed(2)}
+          accuracy={accuracy}
+          heading={heading}
+        />
         <DisplayView time={time} steps={steps} distance={distance.toFixed(2)}>
           <Actioner
             onChange={this.onChange.bind(this, pause)}
             paused={task.pause}
           />
         </DisplayView>
-        <MapView region={region} polylines={polylines} />
+        <MapView coordinate={coordinate} polylines={polylines} />
       </AppContainer>
     );
   }
