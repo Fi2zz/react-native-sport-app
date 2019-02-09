@@ -1,5 +1,5 @@
 //
-//  MainApp.swift
+//  SportModule.swift
 //  Sport
 //
 //  Created by Fitz on 2019/2/6.
@@ -7,7 +7,7 @@
 //
 
 import Foundation
-public class SportModuleEvents {
+class SportModuleEvents {
     let start = "start"
     let walk = "walk"
     let activity = "activity"
