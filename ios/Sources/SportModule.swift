@@ -27,11 +27,7 @@ public class SportModuleEvents {
 
 @objc(SportModule)
 class SportModule: RCTEventEmitter {
-
     static let events = SportModuleEvents();
-  
-    let motion = CMMotionManager();
-
     override func supportedEvents() -> [String]! {
         return [
             SportModule.events.activity,
@@ -47,19 +43,15 @@ class SportModule: RCTEventEmitter {
     override static func requiresMainQueueSetup() -> Bool {
         return true
     }
-
-
-    var location = LocationManager()
-    var step = StepManager();
+    let location = LocationManager()
+    let step = StepManager();
     var isActive = false;
-
     override init() {
         super.init();
 
         func dispatch(name: String, payload: Any?) {
             self.sendEvent(withName: name, body: payload);
         }
-
         self.location.dispatch = dispatch
         self.step.dispatch = dispatch
     }

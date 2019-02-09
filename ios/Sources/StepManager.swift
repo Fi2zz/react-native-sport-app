@@ -6,12 +6,24 @@
 import Foundation
 import CoreMotion;
 
-class StepManager {
 
-    let rangeDelta = -0.12;
+class StepModel {
+  static let ACCELEROMETER_START_TIME: Int = 2;
+  static let ACCELEROMETER_START_STEP: Int = 0;
+  static let ACCELEROMETER_UPDATE_INTERVAL = 1.0 / 30.0;
+  static let SAVE_INTERVAL: Int = 60 * 10 * 10
+  static let ACCELEROMETER_DELTA = 0.10;  
+  var date: Date?;
+  var range: Double = 0.0;
+  init(range:Double,date:Date){
+      self.date = date;
+      self.range = range;
+  }
+}
+
+class StepManager {
     // 加速度传感器采集的原始数组
     var raw: [StepModel] = [];
-    var rawAcceleration: [CMAcceleration] = []
     var dateOfRecording: Date = Date();
     var stepsOfRecording: Int = 0;
     var currentSteps: Int = 0;
@@ -51,12 +63,13 @@ class StepManager {
     }
 
     func start() {
+      
         self.health.authorization();
         if (!self.motion.isAccelerometerAvailable) {
             return;
         }
         self.activityUpdates()
-        self.motion.accelerometerUpdateInterval = StepModel.accelerometerUpdateInterval;
+        self.motion.accelerometerUpdateInterval = StepModel.ACCELEROMETER_UPDATE_INTERVAL;
         self.startAccelerometer();
     }
 
@@ -77,7 +90,6 @@ class StepManager {
         self.motion.startAccelerometerUpdates(to: queue, withHandler: {
 
             (data, error) in
-
             guard(self.motion.isAccelerometerActive != false) else {
                 return;
             }
@@ -87,7 +99,9 @@ class StepManager {
             let z = data.acceleration.z;
             //设定振幅，用于计算是不是走了一步
             let range: Double = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)) - 1
+            
             let count = StepModel(range: range, date: Date())
+
             // 加速度传感器采集的原始数组
             self.raw.append(count);
             // 每采集10条，大约1.2秒的数据时，进行分析
@@ -109,7 +123,7 @@ class StepManager {
             if (index >= 1 && index < cache.count - 2) {
                 let prev = cache[index - 1];
                 let next = cache[index + 1];
-                let con = current.range < self.rangeDelta && current.range < prev.range && current.range < next.range
+                let con = current.range < StepModel.ACCELEROMETER_DELTA && current.range < prev.range && current.range < next.range
                 if (con) {
                     sample.append(current)
                 }
@@ -119,8 +133,6 @@ class StepManager {
 
         // 踩点过滤
         for current in sample {
-
-            let now = Date();
             let interval = current.date!.timeIntervalSince(self.dateOfRecording) * 1000;
             let steppingInterval = Int(interval);
             let min: Int = 259;
@@ -144,32 +156,20 @@ class StepManager {
                 }
 
                 if (self.isWalkingOrRunning) {
+                    let now = Date();
                     self.dispatch(SportModule.events.walk, ["steps": 1]);
                     let every10Minutes = Int(now.timeIntervalSince1970) - Int(self.dateOfRecording.timeIntervalSince1970) > StepModel.SAVE_INTERVAL
-                    //每5分钟记录一次数据
+                    //每10分钟记录一次数据
                     if (every10Minutes && self.currentSteps > 0) {
                         self.saveStepsToHealthKit(steps: Double(self.currentSteps), start: self.dateOfRecording, end: now)
                     }
                 }
             }
-
-
         }
+        
 
 
     }
-
-
-    func tendToZero(_ value: Double) -> Double {
-        if (value < 0) {
-            return ceil(value);
-        } else {
-            return floor(value);
-        }
-
-    }
-
- 
-  
-
 }
+
+

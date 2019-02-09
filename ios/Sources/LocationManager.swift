@@ -102,35 +102,43 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
              guard (location!.horizontalAccuracy >= 0.0 ) else {
                return ;
              }
-          
-          
-              var distance = 0.0
-              //course小于0表示数据不可信
-              if(location!.course > 0){
-                distance = getDistance(coordinate, self.currentCoordinate)
-              }
-              let totalDistance = distance + self.totalDistance
-              self.dispatch(
-                        SportModule.events.locationUpdated,
-                        [
-                            "coordinate": [
-                                "latitude": coordinate.latitude,
-                                "longitude": coordinate.longitude,
-                            ],
-                            "distance": totalDistance,
-                            "accuracy":[
-                                "horizontal":location?.horizontalAccuracy,
-                                "vertical":location?.verticalAccuracy,
-                            ],
-                            "altitude":location!.altitude,
-                            "course":location!.course
 
-                        ]
-                )
-              self.totalDistance = totalDistance;
+             var shouldDispatch = false;
+
+
+             //gps、wifi、基站信号，数值越大信号越差，小于0 为没有信号
+             if(location!.horizontalAccuracy > 0 && location!.horizontalAccuracy <= 120){
+                    shouldDispatch = true;
+             }  
+             if(self.currentLocation == nil){
+                 shouldDispatch = false;
+             } 
+
+              let distance = getDistance(coordinate, self.currentCoordinate) + self.totalDistance
+
+              self.totalDistance = distance;
               self.currentCoordinate = coordinate;
               self.currentLocation = location;
-          
+
+              if(shouldDispatch){
+                self.dispatch(
+                            SportModule.events.locationUpdated,
+                            [
+                                "coordinate": [
+                                    "latitude": coordinate.latitude,
+                                    "longitude": coordinate.longitude,
+                                ],
+                                "distance": distance,
+                                "accuracy":[
+                                    "horizontal":location?.horizontalAccuracy,
+                                    "vertical":location?.verticalAccuracy,
+                                ],
+                                "altitude":location!.altitude,
+                                "course":location!.course
+
+                            ]
+                    )
+              }
         })
       
     }
@@ -154,8 +162,12 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         self.manager.startUpdatingHeading();
     }
 
-
+    
+    
 }
+
+
+
 
 
 
