@@ -53,7 +53,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
              }
             var distance = 0.0;
             if(self.currentLocation != nil){
-               distance = (location!.distance(from: self.currentLocation!) + self.totalDistance) / 1000
+               distance = (location!.distance(from: self.currentLocation!))/1000 + self.totalDistance
             }
             self.dispatch(
                             SportModule.events.locationUpdated,
