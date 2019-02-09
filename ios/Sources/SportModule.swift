@@ -7,10 +7,6 @@
 //
 
 import Foundation
-import CoreLocation;
-import CoreMotion;
-import UIKit
-
 func noopDispatcher(name: String, payload: Any?) -> Void {
 }
 
@@ -29,6 +25,8 @@ public class SportModuleEvents {
 @objc(SportModule)
 class SportModule: RCTEventEmitter {
     static let events = SportModuleEvents();
+    public static func noopDispatcher(name: String, payload: Any?) -> Void {
+    }
     override func supportedEvents() -> [String]! {
         return [
             SportModule.events.activity,
@@ -40,17 +38,13 @@ class SportModule: RCTEventEmitter {
             SportModule.events.locationWarning,
         ]
     }
-
     override static func requiresMainQueueSetup() -> Bool {
         return true
     }
     let location = LocationManager()
     let step = StepManager();
-    var isActive = false;
-  var isAllServiceStarted = false;
     override init() {
         super.init();
-
         func dispatch(name: String, payload: Any?) {
             self.sendEvent(withName: name, body: payload);
         }
@@ -59,38 +53,19 @@ class SportModule: RCTEventEmitter {
     }
 
     @objc func start(_ shouldStartStepManager: Bool) -> Void {
-
-        if (self.isActive) {
-            self.stop(true);
-        }
-        self.location.start();
+        self.stop(true);
         if (shouldStartStepManager == true) {
             self.step.start();
-            self.location.shouldSendDistance = true;
-           self.isAllServiceStarted = true;
-        
         }
-        self.isActive = true;
+        self.location.start();
     }
 
-    @objc func stop(_ shouldStopUpdateLocation: Bool) -> Void {
-        self.isActive = false;
+    @objc func stop(_ shouldStopUpdateLocation: Bool = true) -> Void {
         if (shouldStopUpdateLocation == true) {
             self.location.stop();
         }
         self.step.stop();
     }
-  
-    @objc func didEnterBackground(){
-      if(self.isAllServiceStarted == true){
-        self.location.manager.allowsBackgroundLocationUpdates = true;
-        self.location.manager.requestAlwaysAuthorization()
-      }
-    }
-    @objc func willTerminate(){
-        self.stop(true);
-    }
-    static let sharedInstance = SportModule();
 }
 
 

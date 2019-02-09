@@ -15,12 +15,10 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     var currentLocation:CLLocation?
     var totalDistance: Double = 0.0;
     var isActive = false;
-    public var dispatch = noopDispatcher
-    public var shouldSendDistance = false;
+    public var dispatch = SportModule.noopDispatcher
     static func requiresMainQueueSetup() -> Bool {
         return true
     }
-
     override init() {
         self.manager = CLLocationManager();
         super.init();
@@ -29,12 +27,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         self.manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         self.manager.distanceFilter = kCLDistanceFilterNone;
         self.manager.activityType = CLActivityType.fitness
+        self.manager.allowsBackgroundLocationUpdates = true;
         self.manager.requestWhenInUseAuthorization()
+        self.manager.requestAlwaysAuthorization();
     }
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         self.dispatch(SportModule.events.locationWarning, ["onWarning"])
     }
-
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard locations.count > 0 else {
             return;
@@ -48,24 +47,15 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             }
             let location = placemarks?.first?.location;
             let coordinate = location!.coordinate;
-             //水平方向精度小于0表示数据不可信
-             guard (location!.horizontalAccuracy >= 0.0 ) else {
+             //gps、wifi、基站信号，数值越大信号越差，小于0 为没有信号
+            guard (location!.horizontalAccuracy >= 0.0  &&  location!.horizontalAccuracy <= 140) else {
                return ;
              }
-             var shouldDispatch = false;
-             //gps、wifi、基站信号，数值越大信号越差，小于0 为没有信号
-             if(location!.horizontalAccuracy > 0 && location!.horizontalAccuracy <= 120){
-                    shouldDispatch = true;
-             }  
-             if(self.currentLocation == nil){
-                 shouldDispatch = true;
-             }
-              if(shouldDispatch){
-                var distance = 0.0;
-                if(self.shouldSendDistance){
-                  distance = location!.distance(from: self.currentLocation!) / 1000 + self.totalDistance
-                }
-                self.dispatch(
+            var distance = 0.0;
+            if(self.currentLocation != nil){
+               distance = (location!.distance(from: self.currentLocation!) + self.totalDistance) / 1000
+            }
+            self.dispatch(
                             SportModule.events.locationUpdated,
                             [
                                 "coordinate": [
@@ -79,14 +69,12 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                                 ],
                                 "altitude":location!.altitude,
                                 "course":location!.course
-
                             ]
                     )
           
-                self.totalDistance = distance;
-          }
-          self.currentCoordinate = coordinate;
-          self.currentLocation = location;
+            self.totalDistance = distance;
+            self.currentCoordinate = coordinate;
+            self.currentLocation = location;
         })
     }
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {

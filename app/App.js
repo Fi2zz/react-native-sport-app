@@ -1,15 +1,15 @@
 import React, { Component } from "react";
-import { Animated, Image } from "react-native";
+import { Animated, Image, AppState } from "react-native";
 import {
   InfoView,
   DisplayView,
   MapView,
   Actioner,
-  AppContainer,
-  LocationMarker
+  AppContainer
 } from "./Components";
 import { Sport } from "./SportModule";
 import { Timer } from "./Timer";
+
 export default class App extends Component {
   state = {
     steps: 0,
@@ -28,7 +28,7 @@ export default class App extends Component {
       horizontal: 0
     },
     heading: 0.0,
-    course:0.0
+    course: 0.0
   };
 
   componentDidMount() {
@@ -41,14 +41,14 @@ export default class App extends Component {
           steps: data.steps + this.state.steps
         });
       });
-      Sport.addListener("locationHeadingUpdated", ({heading}) => {
+      Sport.addListener("locationHeadingUpdated", ({ heading }) => {
         this.setState({
           heading
         });
       });
 
       Sport.addListener("locationUpdated", data => {
-        const { coordinate, distance, accuracy,course } = data;
+        const { coordinate, distance, accuracy, course } = data;
         const { polylines } = this.state;
         this.setState({
           polylines: [...polylines, coordinate],

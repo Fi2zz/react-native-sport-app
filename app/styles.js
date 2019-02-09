@@ -78,7 +78,8 @@ export const DisplayStyle = StyleSheet.create({
     right: 0,
     zIndex: 20,
     bottom: 0,
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
+    marginBottom:12
   },
 
   rowContainer: {

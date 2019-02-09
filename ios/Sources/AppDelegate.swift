@@ -55,10 +55,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window?.makeKeyAndVisible()
         return true
     }
-  func applicationDidEnterBackground(_ application: UIApplication) {
-    SportModule.sharedInstance.didEnterBackground();
-  }
-  func applicationWillTerminate(_ application: UIApplication) {
-    SportModule.sharedInstance.willTerminate()
-  }
+ 
 }
