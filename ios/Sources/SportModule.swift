@@ -7,10 +7,6 @@
 //
 
 import Foundation
-func noopDispatcher(name: String, payload: Any?) -> Void {
-}
-
-
 public class SportModuleEvents {
     let start = "start"
     let walk = "walk"
@@ -21,9 +17,9 @@ public class SportModuleEvents {
     let locationWarning = "locationWarning"
 }
 
-
 @objc(SportModule)
 class SportModule: RCTEventEmitter {
+   
     static let events = SportModuleEvents();
     public static func noopDispatcher(name: String, payload: Any?) -> Void {
     }

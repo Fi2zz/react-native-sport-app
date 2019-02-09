@@ -33,8 +33,7 @@ class StepManager {
     //health manager
     let health = HealthManager();
     let activity = CMMotionActivityManager();
-    public var dispatch = noopDispatcher;
-
+    public var dispatch = SportModule.noopDispatcher
     static func requiresMainQueueSetup() -> Bool {
         return false
     }
