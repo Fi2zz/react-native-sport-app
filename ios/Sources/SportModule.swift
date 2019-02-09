@@ -9,6 +9,7 @@
 import Foundation
 import CoreLocation;
 import CoreMotion;
+import UIKit
 
 func noopDispatcher(name: String, payload: Any?) -> Void {
 }
@@ -46,6 +47,7 @@ class SportModule: RCTEventEmitter {
     let location = LocationManager()
     let step = StepManager();
     var isActive = false;
+  var isAllServiceStarted = false;
     override init() {
         super.init();
 
@@ -64,6 +66,9 @@ class SportModule: RCTEventEmitter {
         self.location.start();
         if (shouldStartStepManager == true) {
             self.step.start();
+            self.location.shouldSendDistance = true;
+           self.isAllServiceStarted = true;
+        
         }
         self.isActive = true;
     }
@@ -75,7 +80,17 @@ class SportModule: RCTEventEmitter {
         }
         self.step.stop();
     }
-
+  
+    @objc func didEnterBackground(){
+      if(self.isAllServiceStarted == true){
+        self.location.manager.allowsBackgroundLocationUpdates = true;
+        self.location.manager.requestAlwaysAuthorization()
+      }
+    }
+    @objc func willTerminate(){
+        self.stop(true);
+    }
+    static let sharedInstance = SportModule();
 }
 
 

@@ -42,7 +42,7 @@ class StepManager {
     func stop() {
         self.motion.stopAccelerometerUpdates();
         self.activity.stopActivityUpdates();
-        self.saveStepsToHealthKit(steps: Double(self.currentSteps), start: self.dateOfRecording, end: Date())
+        self.saveStepsToHealthKit(end: Date())
     }
 
     func queryStepsOnLaunch() {
@@ -74,17 +74,20 @@ class StepManager {
     }
 
 
-    func saveStepsToHealthKit(steps: Double, start: Date, end: Date) {
+    @objc func saveStepsToHealthKit(end: Date) {
+
+      if(self.currentSteps == 0 ){
+            return ;
+        }    
+
         self.health.saveSteps(
-                steps: steps,
-                startTime: start,
+                steps:  Double(self.currentSteps),
+                startTime: self.dateOfRecording,
                 endTime: end
         );
         self.currentSteps = 0;
-        self.stepsOfRecording = 0;
         self.dateOfRecording = end;
     }
-
     func startAccelerometer() {
         let queue = OperationQueue();
         self.motion.startAccelerometerUpdates(to: queue, withHandler: {
@@ -138,36 +141,18 @@ class StepManager {
             let min: Int = 259;
 
             if (steppingInterval >= min && self.motion.isAccelerometerActive) {
-
-                if (steppingInterval >= StepModel.ACCELEROMETER_START_TIME * 1000) {// 计步器开始计步时间（秒)
-                    self.stepsOfRecording = 0;
-                }
-
-                if (self.stepsOfRecording < StepModel.ACCELEROMETER_START_STEP) {//计步器开始计步步数 (步)
-                    self.stepsOfRecording += 1;
-                    break;
-                } else if (self.stepsOfRecording == StepModel.ACCELEROMETER_START_STEP) {
-                    self.stepsOfRecording += 1;
-                    // 计步器开始步数
-                    // 运动步数（总计）
-                    self.currentSteps = self.currentSteps + self.stepsOfRecording;
-                } else {
-                    self.currentSteps += 1;
-                }
-
+                self.currentSteps += 1;
                 if (self.isWalkingOrRunning) {
                     let now = Date();
                     self.dispatch(SportModule.events.walk, ["steps": 1]);
                     let every10Minutes = Int(now.timeIntervalSince1970) - Int(self.dateOfRecording.timeIntervalSince1970) > StepModel.SAVE_INTERVAL
                     //每10分钟记录一次数据
-                    if (every10Minutes && self.currentSteps > 0) {
-                        self.saveStepsToHealthKit(steps: Double(self.currentSteps), start: self.dateOfRecording, end: now)
+                    if (every10Minutes) {
+                        self.saveStepsToHealthKit(end: now)
                     }
                 }
             }
         }
-        
-
 
     }
 }

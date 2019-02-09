@@ -9,51 +9,6 @@
 import Foundation
 import CoreLocation
 
-let COORDINATE_LAT_DELTA = 0.00001;
-let COORDINATE_LNG_DELTA = 0.00001;
-let COORDINATE_CHANGE_DELTA = pow(COORDINATE_LNG_DELTA, 2)
-let EARTH_RADIUS = 6378.137;
-let KM_DELTA = 1.609344;
-
-func rad(_ input: Double) -> Double {
-    let pie = Double.pi;
-    return input * pie / 180.0
-}
-
-//https://blog.csdn.net/yi412/article/details/70182769
-func getDistance(_ first: CLLocationCoordinate2D, _ second: CLLocationCoordinate2D?) -> Double {
-
-    if (second == nil) {
-        return 0.0;
-    }
-
-    let radLat1 = rad(first.latitude);
-    let radLat2 = rad(second!.latitude);
-    let radLng1 = rad(first.latitude);
-    let radLng2 = rad(second!.latitude);
-
-    let deltaLat = radLat1 - radLat1;
-    let deltaLng = radLng1 - radLng2;
-
-    let sinLngDelta = sin(deltaLng / 2);
-    let sinLatDelta = sin(deltaLat / 2);
-  
-    let powOfLatDelta = pow(sinLngDelta,2)
-    let coses = cos(radLat1) *  cos(radLat2);
-    let delta = powOfLatDelta + (sinLatDelta * coses)
-    let square = sqrt(delta);
-
-    let doulbeAndAsin = 2 * asin(square);
-    
-    let withEarthRadius =  doulbeAndAsin * EARTH_RADIUS
-    let withRound = round(withEarthRadius * 10000) / 1000;
-  
-    let withKMDelta = withRound * KM_DELTA
-    return withKMDelta
-
-}
-
-
 class LocationManager: NSObject, CLLocationManagerDelegate {
     public var manager: CLLocationManager;
     var currentCoordinate: CLLocationCoordinate2D?;
@@ -61,26 +16,21 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     var totalDistance: Double = 0.0;
     var isActive = false;
     public var dispatch = noopDispatcher
-
+    public var shouldSendDistance = false;
     static func requiresMainQueueSetup() -> Bool {
         return true
     }
 
     override init() {
-
         self.manager = CLLocationManager();
         super.init();
         self.manager.delegate = self
         self.manager.pausesLocationUpdatesAutomatically = true;
-        self.manager.desiredAccuracy = kCLLocationAccuracyBest
-        self.manager.distanceFilter = 1;
+        self.manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        self.manager.distanceFilter = kCLDistanceFilterNone;
         self.manager.activityType = CLActivityType.fitness
-        self.manager.allowsBackgroundLocationUpdates = true;
         self.manager.requestWhenInUseAuthorization()
-        self.manager.requestAlwaysAuthorization();
     }
-
-
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         self.dispatch(SportModule.events.locationWarning, ["onWarning"])
     }
@@ -102,25 +52,19 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
              guard (location!.horizontalAccuracy >= 0.0 ) else {
                return ;
              }
-
              var shouldDispatch = false;
-
-
              //gps、wifi、基站信号，数值越大信号越差，小于0 为没有信号
              if(location!.horizontalAccuracy > 0 && location!.horizontalAccuracy <= 120){
                     shouldDispatch = true;
              }  
              if(self.currentLocation == nil){
-                 shouldDispatch = false;
-             } 
-
-              let distance = getDistance(coordinate, self.currentCoordinate) + self.totalDistance
-
-              self.totalDistance = distance;
-              self.currentCoordinate = coordinate;
-              self.currentLocation = location;
-
+                 shouldDispatch = true;
+             }
               if(shouldDispatch){
+                var distance = 0.0;
+                if(self.shouldSendDistance){
+                  distance = location!.distance(from: self.currentLocation!) / 1000 + self.totalDistance
+                }
                 self.dispatch(
                             SportModule.events.locationUpdated,
                             [
@@ -138,21 +82,21 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
                             ]
                     )
-              }
+          
+                self.totalDistance = distance;
+          }
+          self.currentCoordinate = coordinate;
+          self.currentLocation = location;
         })
-      
     }
-
     func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
         self.dispatch(SportModule.events.locationHeadingUpdated, ["heading": newHeading.trueHeading])
     }
-
     func stop() {
         self.isActive = false;
         self.manager.stopUpdatingLocation();
         self.manager.stopUpdatingHeading()
     }
-
     func start() {
         if (self.isActive) {
             self.stop();

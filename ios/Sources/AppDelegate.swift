@@ -51,13 +51,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window = UIWindow(frame: UIScreen.main.bounds);
         let rootViewController = UIViewController();
         rootViewController.view = rootView;
-
         self.window?.rootViewController = rootViewController;
         self.window?.makeKeyAndVisible()
-
-
         return true
     }
-
-
+  func applicationDidEnterBackground(_ application: UIApplication) {
+    SportModule.sharedInstance.didEnterBackground();
+  }
+  func applicationWillTerminate(_ application: UIApplication) {
+    SportModule.sharedInstance.willTerminate()
+  }
 }
